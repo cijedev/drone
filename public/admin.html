@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — DroneFoot</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></head><body>
+<nav><a class="logo" href="./">Drone<span>Foot</span> <small style="color:var(--mut);letter-spacing:.1em">ADMIN</small></a><a class="btn" href="#" id="out" style="display:none">Log out</a></nav>
+<div class="wrap">
+<div class="panel" id="login" style="display:none;max-width:420px;margin:10vh auto"><h2>Sign in</h2><form id="lf"><input type="password" id="pw" placeholder="Admin password" autofocus><button class="p">Sign in</button><div class="msg" id="lm"></div></form></div>
+<div id="app" style="display:none">
+<div class="tabs"><button class="tab on" data-t="videos">🎬 Videos</button><button class="tab" data-t="airspace">🛰️ Airspace Check</button></div>
+<div id="tab-airspace" style="display:none">
+<div class="disc"><b>⚠️ For information only.</b> This tool reads public FAA data and may be incomplete, delayed or wrong. It is not an authorization. Always confirm with an FAA-approved app such as <a href="https://www.faa.gov/uas/getting_started/b4ufly" target="_blank" rel="noopener">B4UFLY</a> / <a href="https://www.aloft.ai/" target="_blank" rel="noopener">Aloft</a> (and obtain LAANC authorization where required) before every flight. Check NOTAMs/TFRs right before takeoff.</div>
+<div class="panel aspanel"><div class="asbar"><button class="p" id="asme">📍 Re-check my location</button><label class="tg"><input type="checkbox" id="astrack"> Live tracking <small>(re-check when moved &gt;200 m)</small></label><span class="acc" id="asacc"></span></div>
+<div class="locmsg" id="aslocmsg" hidden></div>
+<form class="assearch" id="asform" hidden><input id="asq" placeholder="Search an address or place (US)…"><button class="s">Search</button><div class="asres" id="asres"></div></form>
+<div class="banner wait" id="asbanner"><div class="bt">📡 Checking your location…</div><div class="bs" id="asbsub"></div></div>
+<div class="asgrid"><div id="asmap"></div><div id="asverdict" class="verdict"><div class="vt">Waiting for your location…</div></div></div>
+<div class="legend"><span><i style="background:#ff4d6d"></i>Restricted / no-fly</span><span><i style="background:#ffb020"></i>Controlled (LAANC)</span><span><i style="background:#4fd1ff"></i>LAANC grid (ft AGL)</span><span><i style="background:#a78bfa"></i>Caution / part-time</span></div>
+<p class="msg" style="font-size:12px">Data: FAA UAS Facility Maps, Class Airspace, Special Use Airspace, Prohibited Areas, National Security UAS Flight Restrictions (full &amp; part-time), National Defense Airspace, SFRA/FRZ (FAA ArcGIS open data) and active TFRs (tfr.faa.gov). US only.</p></div>
+</div>
+<div id="tab-videos">
+<div class="panel"><h2>Upload footage</h2><form id="uf">
+<div class="drop" id="drop">Drag & drop a video here, or click to choose<br><small>MP4 / MOV / WebM — large files supported</small></div><input type="file" id="file" accept="video/*" hidden>
+<input id="title" placeholder="Title" required><input id="loc" placeholder="Location (optional)"><textarea id="desc" rows="3" placeholder="Description"></textarea>
+<label class="ml">Background music</label><div class="music" id="music"></div>
+<button class="p" id="ub">Upload</button><div class="bar" id="bar"><div></div></div><div class="msg" id="um"></div></form></div>
+<div class="panel"><h2>Your videos</h2><div id="list"></div></div></div></div></div>
+<script>
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),mb=b=>(b/1048576).toFixed(1)+' MB';
+async function init(){const m=await (await fetch('api/me')).json();login.style.display=m.admin?'none':'block';app.style.display=out.style.display=m.admin?'block':'none';if(m.admin)list_()}
+lf.onsubmit=async e=>{e.preventDefault();const r=await fetch('api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw.value})});if(r.ok)init();else lm.textContent='Wrong password'};
+out.onclick=async e=>{e.preventDefault();await fetch('api/logout',{method:'POST'});init()};
+let f=null;drop.onclick=()=>file.click();file.onchange=()=>pick(file.files[0]);
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('on')};drop.ondragleave=()=>drop.classList.remove('on');drop.ondrop=e=>{e.preventDefault();drop.classList.remove('on');pick(e.dataTransfer.files[0])};
+function pick(x){if(!x)return;f=x;drop.innerHTML='🎬 '+esc(x.name)+' <small>('+mb(x.size)+')</small>';if(!title.value)title.value=x.name.replace(/\.[^.]+$/,'')}
+uf.onsubmit=e=>{e.preventDefault();if(!f){um.textContent='Choose a video first';return}
+ const fd=new FormData();fd.append('title',title.value);fd.append('description',desc.value);fd.append('location',loc.value);fd.append('music',music.dataset.v||'');fd.append('video',f);
+ const x=new XMLHttpRequest();x.open('POST','api/videos');bar.style.display='block';ub.disabled=true;const t0=Date.now();
+ x.upload.onprogress=p=>{const pc=p.loaded/p.total*100;bar.firstChild.style.width=pc+'%';const sp=p.loaded/((Date.now()-t0)/1000);um.textContent=`${pc.toFixed(1)}% · ${mb(p.loaded)} / ${mb(p.total)} · ${mb(sp)}/s`;if(pc>=100)um.textContent='Processing (generating thumbnail)…'};
+ x.onload=()=>{ub.disabled=false;if(x.status==200){um.textContent='✓ Uploaded!';uf.reset();f=null;setM(music,'');drop.innerHTML='Drag & drop a video here, or click to choose';setTimeout(()=>{bar.style.display='none';bar.firstChild.style.width=0},1500);list_()}else um.textContent='Upload failed: '+x.responseText};
+ x.onerror=()=>{ub.disabled=false;um.textContent='Network error'};x.send(fd)};
+async function list_(){const v=await (await fetch('api/videos')).json();list.innerHTML=v.length?v.map(x=>`<div class="row" data-id="${x.id}"><img src="${x.thumb?'thumbs/'+x.thumb:''}"><div class="t"><b>${esc(x.title)}</b><small>${x.music?'♪ '+(T.find(t=>t.id==x.music)||{}).theme+' · ':''}${new Date(x.date).toLocaleString()} · ${mb(x.size)}</small></div><button class="s" data-a="link">🔗 Copy link</button><button class="s" data-a="edit">Edit</button><button class="s del" data-a="del">Delete</button></div>`).join(''):'<p class="msg">No videos yet.</p>';list.v=v}
+list.onclick=async e=>{const a=e.target.dataset.a;if(!a)return;const row=e.target.closest('.row'),id=row.dataset.id,x=list.v.find(y=>y.id==id);
+ if(a=='link'){const sl=String(x.title||'').toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g,'').trim().replace(/[\s_]+/g,'-').replace(/-+/g,'-').slice(0,60);const u=new URL('v/'+x.id+(sl?'-'+sl:''),document.baseURI).href;let ok=false;try{await navigator.clipboard.writeText(u);ok=true}catch(_){const t=document.createElement('textarea');t.value=u;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(__){}t.remove()}if(!ok){prompt('Copy this link:',u);return}const o=e.target.textContent;e.target.textContent='✓ Copied';setTimeout(()=>e.target.textContent=o,1500)}
+ if(a=='del'){if(confirm('Delete "'+x.title+'"? This removes the file permanently.')){await fetch('api/videos/'+id,{method:'DELETE'});list_()}}
+ if(a=='edit'){row.querySelector('.t').innerHTML=`<input class="et" value="${esc(x.title)}"><input class="el" value="${esc(x.location||'')}" placeholder="Location"><textarea class="ed" rows="2">${esc(x.description)}</textarea><div class="music em"></div><button class="s" data-a="save">Save</button>`;const em=row.querySelector('.em');buildM(em);setM(em,x.music||'')}
+ if(a=='save'){await fetch('api/videos/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:row.querySelector('.et').value,location:row.querySelector('.el').value,description:row.querySelector('.ed').value,music:row.querySelector('.em').dataset.v||''})});list_()}};
+let T=[];const pv=new Audio();let pvb=null;
+function buildM(el){el.innerHTML=[{id:'',theme:'None'}].concat(T).map(t=>`<span class="chip" data-m="${t.id}"><span class="cn">${t.theme}</span>${t.id?`<button type="button" class="pp" data-p="${t.id}" title="Preview ${esc(t.title)}">▶</button>`:''}</span>`).join('');
+ el.onclick=e=>{const p=e.target.closest('[data-p]');if(p){e.stopPropagation();const t=T.find(x=>x.id==p.dataset.p);if(pvb===p&&!pv.paused){pv.pause();p.textContent='▶';return}document.querySelectorAll('.pp').forEach(b=>b.textContent='▶');pv.src='music/'+t.file;pv.currentTime=0;pv.play();p.textContent='❚❚';pvb=p;return}const c=e.target.closest('.chip');if(c)setM(el,c.dataset.m)}}
+function setM(el,v){el.dataset.v=v;el.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.m===v))}
+pv.onended=()=>pvb&&(pvb.textContent='▶');
+fetch('music/tracks.json').then(r=>r.json()).then(t=>{T=t;buildM(music);setM(music,'');init()});
+</script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><script src="airspace.js"></script></body></html>

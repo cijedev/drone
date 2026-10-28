@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!--META--><title>DroneFoot — Drone Footage</title><meta name="description" content="DroneFoot — aerial drone footage gallery."><meta property="og:title" content="DroneFoot"><!--/META--><link rel="stylesheet" href="style.css"></head><body>
+<nav><a class="logo" href="./">Drone<span>Foot</span></a><a class="btn" href="admin">Admin</a></nav>
+<section class="hero"><div class="bg" id="herobg"></div><div class="c"><div class="eyebrow">Aerial Cinematography</div><h1>The world,<br><em>from above.</em></h1><p>A collection of drone footage — landscapes, coastlines and cities captured from the sky.</p><a class="cta" href="#gallery">Watch the footage ↓</a></div></section>
+<main id="gallery"><div class="sh"><h2>Latest Flights</h2><span id="count"></span></div><div class="grid" id="grid"></div></main>
+<footer>© <span id="yr"></span> DroneFoot<div class="credits" id="credits"></div></footer>
+<div class="modal" id="modal"><button class="x" id="x">×</button><video id="player" controls playsinline></video><div class="toast" id="toast">Link copied</div><audio id="bgm" loop preload="auto"></audio><div class="info"><div class="ih"><h3 id="mt"></h3><div class="acts"><button class="mt" id="mtog" hidden>♪ Music on</button><div class="sharew"><button class="mt sh" id="shbtn">↗ Share</button><div class="shmenu" id="shmenu" hidden><button id="shcopy">🔗 Copy link</button><a id="shx" target="_blank" rel="noopener">𝕏 Post on X</a><a id="shfb" target="_blank" rel="noopener">f Share on Facebook</a><a id="shwa" target="_blank" rel="noopener">◎ WhatsApp</a></div></div></div></div><div class="np" id="np"></div><p id="md"></p></div></div>
+<script>
+const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+yr.textContent=new Date().getFullYear();
+const slug=t=>String(t||'').toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g,'').trim().replace(/[\s_]+/g,'-').replace(/-+/g,'-').slice(0,60);
+const vpath=x=>'v/'+x.id+(slug(x.title)?'-'+slug(x.title):'');
+const absUrl=x=>new URL(vpath(x),document.baseURI).href;
+let V=[],cur=null,pushed=false;const baseTitle='DroneFoot — Drone Footage';
+function openVideo(x,push){cur=x;player.src='media/'+x.file;player.poster=x.thumb?'thumbs/'+x.thumb:'';mt.textContent=x.title;setMusic(x.music);md.textContent=x.description;modal.classList.add('open');shmenu.hidden=true;
+ document.title=x.title+' — DroneFoot';if(push){history.pushState({v:x.id},'',vpath(x));pushed=true}else history.replaceState({v:x.id},'',vpath(x));
+ player.play().catch(()=>{})}
+function closeVideo(fromPop){if(!cur)return;cur=null;modal.classList.remove('open');player.pause();bgm.pause();player.removeAttribute('src');player.load();shmenu.hidden=true;document.title=baseTitle;
+ if(!fromPop){if(pushed){pushed=false;history.back()}else history.replaceState({},'','./')}}
+addEventListener('popstate',e=>{const id=e.state&&e.state.v;const x=id&&V.find(v=>v.id==id);if(x)openVideo(x,false),pushed=false;else{pushed=false;closeVideo(true)}});
+const close=()=>closeVideo(false);
+x.onclick=close;modal.onclick=e=>{if(e.target===modal)close()};onkeydown=e=>{if(e.key=='Escape')close()};
+const toastMsg=m=>{toast.textContent=m;toast.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>toast.classList.remove('on'),1800)};
+async function copyLink(u){try{await navigator.clipboard.writeText(u)}catch(e){const t=document.createElement('textarea');t.value=u;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}toastMsg('Link copied')}
+const mobile=()=>matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+shbtn.onclick=async e=>{e.stopPropagation();if(!cur)return;const u=absUrl(cur);
+ if(navigator.share&&mobile()){try{await navigator.share({title:cur.title,text:cur.description||'Drone footage on DroneFoot',url:u});return}catch(err){if(err.name==='AbortError')return}}
+ const t=encodeURIComponent(cur.title+' — DroneFoot'),eu=encodeURIComponent(u);shx.href=`https://twitter.com/intent/tweet?text=${t}&url=${eu}`;shfb.href=`https://www.facebook.com/sharer/sharer.php?u=${eu}`;shwa.href=`https://wa.me/?text=${t}%20${eu}`;
+ if(shmenu.hidden){shmenu.hidden=false;copyLink(u)}else shmenu.hidden=true};
+shcopy.onclick=e=>{e.stopPropagation();copyLink(absUrl(cur));shmenu.hidden=true};
+document.addEventListener('click',e=>{if(!e.target.closest('.sharew'))shmenu.hidden=true});
+let T=[],musicOn=true;
+Promise.all([fetch('music/tracks.json').then(r=>r.json()).catch(()=>[]),fetch('api/videos').then(r=>r.json())]).then(([t,v])=>{T=t;V=v;
+ credits.innerHTML='Music: '+t.map(x=>`“<a href="${x.source}" target="_blank" rel="noopener">${esc(x.title)}</a>” by ${esc(x.artist)}`).join(' · ')+' — Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons: By Attribution 4.0</a> (incompetech.com)';
+ count.textContent=v.length+' video'+(v.length==1?'':'s');
+ if(!v.length){grid.outerHTML='<div class="empty">No footage yet — check back soon.</div>';return}
+ const hv=document.createElement('video');Object.assign(hv,{src:'media/'+v[0].file,muted:true,loop:true,autoplay:true,playsInline:true,className:'bg'});if(v[0].thumb)hv.poster='thumbs/'+v[0].thumb;herobg.replaceWith(hv);
+ grid.innerHTML=v.map((x,i)=>`<a class="card" href="${vpath(x)}" style="animation-delay:${i*.06}s" data-i="${i}"><div class="thumb">${x.thumb?`<img loading="lazy" src="thumbs/${x.thumb}" alt="">`:''}<div class="play"><i></i></div>${x.duration?`<span class="dur">${fmt(x.duration)}</span>`:''}</div><div class="meta"><div class="d">${new Date(x.date).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}${x.location?' · '+esc(x.location):''}</div><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p></div></a>`).join('');
+ grid.onclick=e=>{const c=e.target.closest('.card');if(!c||e.metaKey||e.ctrlKey)return;e.preventDefault();openVideo(v[c.dataset.i],true)};
+ const m=location.pathname.match(/\/v\/([0-9a-f]{16})/);if(m){const x=v.find(y=>y.id==m[1]);if(x)openVideo(x,false);else{history.replaceState({},'','./');toastMsg('Video not found')}}
+});
+function setMusic(id){const t=T.find(x=>x.id==id);bgm.pause();if(!t){bgm.removeAttribute('src');player.muted=false;mtog.hidden=true;np.textContent='';return}
+ bgm.src='music/'+t.file;mtog.hidden=false;np.innerHTML=`♪ ${esc(t.theme)} — “${esc(t.title)}” by ${esc(t.artist)}`;applyM()}
+function applyM(){const has=!!bgm.getAttribute('src');player.muted=has&&musicOn;bgm.muted=!musicOn;mtog.textContent=musicOn?'♪ Music on':'♪ Music off';mtog.classList.toggle('off',!musicOn)}
+const sync=()=>{if(!bgm.getAttribute('src')||!bgm.duration)return;const t=player.currentTime%bgm.duration;if(Math.abs(bgm.currentTime-t)>0.3)bgm.currentTime=t};
+player.addEventListener('play',()=>{if(bgm.getAttribute('src')){sync();bgm.play().catch(()=>{})}});
+player.addEventListener('pause',()=>bgm.pause());player.addEventListener('waiting',()=>bgm.pause());player.addEventListener('playing',()=>{if(bgm.getAttribute('src'))bgm.play().catch(()=>{})});
+player.addEventListener('seeked',sync);player.addEventListener('ratechange',()=>bgm.playbackRate=player.playbackRate);
+player.addEventListener('ended',()=>{bgm.pause();bgm.currentTime=0});
+mtog.onclick=()=>{musicOn=!musicOn;applyM()};
+</script></body></html>

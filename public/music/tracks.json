@@ -1,0 +1,102 @@
+[
+ {
+  "id": "peaceful",
+  "theme": "Peaceful",
+  "file": "peaceful.mp3",
+  "title": "Gymnopedie No. 1",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100787",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "live",
+  "theme": "Live",
+  "file": "live.mp3",
+  "title": "Life of Riley",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400054",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "flying",
+  "theme": "Flying",
+  "file": "flying.mp3",
+  "title": "Heroic Age",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100323",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "hiphop",
+  "theme": "Hip Hop",
+  "file": "hiphop.mp3",
+  "title": "Rollin at 5",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400025",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "cinematic",
+  "theme": "Cinematic",
+  "file": "cinematic.mp3",
+  "title": "Crossing the Chasm",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100410",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "adventure",
+  "theme": "Adventure",
+  "file": "adventure.mp3",
+  "title": "Adventure Meme",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Adventure%20Meme.mp3",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "jazz",
+  "theme": "Jazz",
+  "file": "jazz.mp3",
+  "title": "Backbay Lounge",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Backbay%20Lounge.mp3",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "lofi",
+  "theme": "Chill Lo-Fi",
+  "file": "lofi.mp3",
+  "title": "Chill Wave",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Chill%20Wave.mp3",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "electronic",
+  "theme": "Electronic",
+  "file": "electronic.mp3",
+  "title": "Ouroboros",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Ouroboros.mp3",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+  "id": "acoustic",
+  "theme": "Acoustic",
+  "file": "acoustic.mp3",
+  "title": "Folk Round",
+  "artist": "Kevin MacLeod",
+  "source": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Folk%20Round.mp3",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+ }
+]
